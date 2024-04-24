@@ -20,7 +20,6 @@ from asyncio import QueueEmpty
 from GeezProject.config import que
 from pyrogram import Client, filters
 from pyrogram.types import Message
-
 from GeezProject.function.admins import set
 from GeezProject.helpers.channelmusic import get_chat_id
 from GeezProject.helpers.decorators import authorized_users_only, errors
@@ -28,8 +27,9 @@ from GeezProject.helpers.filters import command, other_filters
 from GeezProject.services.callsmusic import callsmusic
 from GeezProject.services.queues import queues
 
-
 @Client.on_message(filters.command("adminreset"))
+@authorized_users_only
+@errors
 async def update_admin(client, message: Message):
     chat_id = get_chat_id(message.chat)
     set(
@@ -43,9 +43,9 @@ async def update_admin(client, message: Message):
 
 
 @Client.on_message(command("pause") & other_filters)
-@errors
 @authorized_users_only
-async def pause(_, message: Message):
+@errors
+async def pause(client, message: Message):
     chat_id = get_chat_id(message.chat)
     if (chat_id not in callsmusic.pytgcalls.active_calls) or (
         callsmusic.pytgcalls.active_calls[chat_id] == "paused"
@@ -57,9 +57,9 @@ async def pause(_, message: Message):
 
 
 @Client.on_message(command("resume") & other_filters)
-@errors
 @authorized_users_only
-async def resume(_, message: Message):
+@errors
+async def resume(client, message: Message):
     chat_id = get_chat_id(message.chat)
     if (chat_id not in callsmusic.pytgcalls.active_calls) or (
         callsmusic.pytgcalls.active_calls[chat_id] == "playing"
@@ -71,9 +71,9 @@ async def resume(_, message: Message):
 
 
 @Client.on_message(command("end") & other_filters)
-@errors
 @authorized_users_only
-async def stop(_, message: Message):
+@errors
+async def stop(client, message: Message):
     chat_id = get_chat_id(message.chat)
     if chat_id not in callsmusic.pytgcalls.active_calls:
         await message.reply_text("❗ Nothing is streaming!")
@@ -88,9 +88,9 @@ async def stop(_, message: Message):
 
 
 @Client.on_message(command("skip") & other_filters)
-@errors
 @authorized_users_only
-async def skip(_, message: Message):
+@errors
+async def skip(client, message: Message):
     global que
     chat_id = get_chat_id(message.chat)
     if chat_id not in callsmusic.pytgcalls.active_calls:
@@ -114,6 +114,7 @@ async def skip(_, message: Message):
 
 
 @Client.on_message(filters.command("admincache"))
+@authorized_users_only
 @errors
 async def admincache(client, message: Message):
     set(
